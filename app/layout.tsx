@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Lato } from "next/font/google";
 import "./globals.css";
 
@@ -20,11 +20,12 @@ export const metadata: Metadata = {
   title: "Adrián & Sara | 04/07/2026",
   description:
     "Invitación de boda digital de Adrián Santiago Jaime & Sara Reyes Aranda. Sevilla, 04/07/2026.",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({

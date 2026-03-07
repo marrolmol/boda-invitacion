@@ -2,7 +2,7 @@
 "use client";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, easeOut } from "framer-motion";
 import { Play, Pause, Mail } from "lucide-react";
 
 type TimeLeft = {
@@ -13,9 +13,11 @@ type TimeLeft = {
 };
 
 function useCountdown(target: Date) {
-  const [left, setLeft] = useState<TimeLeft>(() => calcLeft(target));
+  const [left, setLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   useEffect(() => {
-    const i = setInterval(() => setLeft(calcLeft(target)), 1000);
+    const tick = () => setLeft(calcLeft(target));
+    tick();
+    const i = setInterval(tick, 1000);
     return () => clearInterval(i);
   }, [target]);
   return left;
@@ -34,7 +36,7 @@ function calcLeft(target: Date): TimeLeft {
 const fadeIn = {
   initial: { opacity: 0, y: 10 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: "easeOut" },
+  transition: { duration: 0.6, ease: easeOut },
 };
 
 export default function Home() {
@@ -43,9 +45,11 @@ export default function Home() {
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
     audioRef.current = typeof window !== "undefined" ? new Audio("/music.mp3") : null;
     audioRef.current && (audioRef.current.loop = true);
+    setMounted(true);
   }, []);
   const togglePlay = () => {
     if (!audioRef.current) return;
@@ -92,7 +96,9 @@ export default function Home() {
                 variants={fadeIn}
                 className="card flex flex-col items-center justify-center py-3"
               >
-                <div className="serif text-2xl">{item.value.toString().padStart(2, "0")}</div>
+                <div suppressHydrationWarning className="serif text-2xl">
+                  {mounted ? item.value.toString().padStart(2, "0") : "--"}
+                </div>
                 <div className="mt-1 text-[11px] tracking-wide text-deep/70">{item.label}</div>
               </motion.div>
             ))}
