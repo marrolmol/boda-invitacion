@@ -1,31 +1,32 @@
 import type { Metadata, Viewport } from "next";
-import { Playfair_Display, Lato } from "next/font/google";
+import { Cinzel, Inter } from "next/font/google";
 import "./globals.css";
 
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
+const cinzel = Cinzel({
+  variable: "--font-cinzel",
   subsets: ["latin"],
   weight: ["400", "600", "700"],
   display: "swap",
 });
 
-const lato = Lato({
-  variable: "--font-lato",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["400", "500", "700"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "Adrián & Sara | 04/07/2026",
   description:
-    "Invitación de boda digital de Adrián Santiago Jaime & Sara Reyes Aranda. Sevilla, 04/07/2026.",
+    "Invitación de boda digital de Adrián & Sara. Sevilla, 04/07/2026.",
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -35,7 +36,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${playfair.variable} ${lato.variable} antialiased bg-cream text-deep`}>
+      <body className={`${cinzel.variable} ${inter.variable} antialiased bg-white text-black`}>
         {children}
       </body>
     </html>

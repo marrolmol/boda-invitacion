@@ -1,17 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --cream: #faf3e0;
-  --deep: #2b2a28;
-  --gold: #d4c19c;
+  --pure-white: #ffffff;
+  --off-white: #fcfcfc;
+  --deep-black: #000000;
+  --soft-gray: #f5f5f5;
+  --mid-gray: #e0e0e0;
 }
 
 @theme inline {
-  --color-cream: var(--cream);
-  --color-deep: var(--deep);
-  --color-gold: var(--gold);
-  --font-serif: var(--font-playfair);
-  --font-sans: var(--font-lato);
+  --color-cream: var(--pure-white);
+  --color-deep: var(--deep-black);
+  --color-gold: var(--deep-black);
+  --font-serif: var(--font-cinzel);
+  --font-sans: var(--font-inter);
 }
 
 html, body {
@@ -19,22 +21,24 @@ html, body {
 }
 
 body {
-  background: var(--cream);
-  color: var(--deep);
-  font-family: var(--font-lato), system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+  background: var(--pure-white);
+  color: var(--deep-black);
+  font-family: var(--font-inter), system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  letter-spacing: -0.01em;
 }
 
 /* Tipografías base móviles */
 h1, h2, h3, .serif {
-  font-family: var(--font-playfair), Georgia, "Times New Roman", serif;
+  font-family: var(--font-cinzel), serif;
+  letter-spacing: 0.05em;
 }
 
-/* Utilidades */
+/* Utilidades B&W Minimalist */
 .card {
-  background: #fff8ea;
-  border: 1px solid color-mix(in oklab, var(--gold) 35%, white);
-  border-radius: 18px;
-  box-shadow: 0 6px 18px color-mix(in oklab, var(--gold) 25%, transparent);
+  background: var(--off-white);
+  border: 1px solid var(--mid-gray);
+  border-radius: 4px; /* Más minimalista y recto */
+  box-shadow: none; /* Sin sombras para estilo revista */
 }
