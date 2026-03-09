@@ -78,11 +78,16 @@ function IntroInvitation({ onOpen }: { onOpen: () => void }) {
 
 function Countdown() {
   const [mounted, setMounted] = useState(false);
+  const [forceShow, setForceShow] = useState(false);
   const targetDate = useMemo(() => new Date("2026-07-04T18:30:00"), []);
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
     setMounted(true);
+    
+    // Forzar visibilidad tras 1 segundo por seguridad
+    const forceTimer = setTimeout(() => setForceShow(true), 1000);
+
     const tick = () => {
       const now = new Date();
       const diff = Math.max(targetDate.getTime() - now.getTime(), 0);
@@ -96,7 +101,10 @@ function Countdown() {
 
     tick();
     const timer = setInterval(tick, 1000);
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      clearTimeout(forceTimer);
+    };
   }, [targetDate]);
 
   if (!mounted) return null;
@@ -104,10 +112,11 @@ function Countdown() {
   return (
     <motion.div
       className="mt-16 grid grid-cols-4 gap-4"
-      initial="initial"
-      whileInView="animate"
-      viewport={{ once: true }}
-      transition={{ staggerChildren: 0.1 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={forceShow ? { opacity: 1, y: 0 } : {}}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.1 }}
+      transition={{ staggerChildren: 0.1, duration: 0.8 }}
     >
       {[
         { label: "Días", value: timeLeft.days },
@@ -117,7 +126,9 @@ function Countdown() {
       ].map((item) => (
         <motion.div
           key={item.label}
-          variants={fadeInUp}
+          initial={{ opacity: 0, y: 10 }}
+          animate={forceShow ? { opacity: 1, y: 0 } : {}}
+          whileInView={{ opacity: 1, y: 0 }}
           className="flex flex-col items-center justify-center bg-transparent"
         >
           <span className="serif text-4xl font-light text-black tracking-tighter">
