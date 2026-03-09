@@ -2,7 +2,17 @@
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Pause, Heart } from "lucide-react";
+import { 
+  Play, 
+  Pause, 
+  Heart, 
+  Church, 
+  CheckCircle2, 
+  Bus, 
+  GlassWater, 
+  UtensilsCrossed, 
+  Moon 
+} from "lucide-react";
 
 type TimeLeft = {
   days: number;
@@ -66,31 +76,63 @@ function IntroInvitation({ onOpen }: { onOpen: () => void }) {
   );
 }
 
-function useCountdown(target: Date) {
-  const [left, setLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-  useEffect(() => {
-    const tick = () => setLeft(calcLeft(target));
-    tick();
-    const i = setInterval(tick, 1000);
-    return () => clearInterval(i);
-  }, [target]);
-  return left;
-}
+function Countdown() {
+  const [mounted, setMounted] = useState(false);
+  const targetDate = useMemo(() => new Date("2026-07-04T18:30:00"), []);
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
-function calcLeft(target: Date): TimeLeft {
-  const now = new Date();
-  const diff = Math.max(target.getTime() - now.getTime(), 0);
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-  const minutes = Math.floor((diff / (1000 * 60)) % 60);
-  const seconds = Math.floor((diff / 1000) % 60);
-  return { days, hours, minutes, seconds };
+  useEffect(() => {
+    setMounted(true);
+    const tick = () => {
+      const now = new Date();
+      const diff = Math.max(targetDate.getTime() - now.getTime(), 0);
+      setTimeLeft({
+        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((diff / (1000 * 60)) % 60),
+        seconds: Math.floor((diff / 1000) % 60),
+      });
+    };
+
+    tick();
+    const timer = setInterval(tick, 1000);
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  if (!mounted) return null;
+
+  return (
+    <motion.div
+      className="mt-16 grid grid-cols-4 gap-4"
+      initial="initial"
+      whileInView="animate"
+      viewport={{ once: true }}
+      transition={{ staggerChildren: 0.1 }}
+    >
+      {[
+        { label: "Días", value: timeLeft.days },
+        { label: "Horas", value: timeLeft.hours },
+        { label: "Minutos", value: timeLeft.minutes },
+        { label: "Segundos", value: timeLeft.seconds },
+      ].map((item) => (
+        <motion.div
+          key={item.label}
+          variants={fadeInUp}
+          className="flex flex-col items-center justify-center bg-transparent"
+        >
+          <span className="serif text-4xl font-light text-black tracking-tighter">
+            {item.value.toString().padStart(2, "0")}
+          </span>
+          <span className="mt-2 text-[7px] tracking-[0.4em] text-black/40 uppercase font-medium">
+            {item.label}
+          </span>
+        </motion.div>
+      ))}
+    </motion.div>
+  );
 }
 
 export default function Home() {
-  const targetDate = useMemo(() => new Date("2026-07-04T18:30:00"), []);
-  const left = useCountdown(targetDate);
-
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -159,31 +201,7 @@ export default function Home() {
             <p className="mt-8 text-[11px] text-black/60 tracking-[0.3em] font-light uppercase">Sevilla · 04 / 07 / 2026</p>
           </motion.div>
 
-          <motion.div
-            className="mt-16 grid grid-cols-4 gap-px bg-black/5 border border-black/5"
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ staggerChildren: 0.1 }}
-          >
-            {[
-              { label: "Días", value: left.days },
-              { label: "Horas", value: left.hours },
-              { label: "Min", value: left.minutes },
-              { label: "Seg", value: left.seconds },
-            ].map((item) => (
-              <motion.div
-                key={item.label}
-                variants={fadeInUp}
-                className="flex flex-col items-center justify-center py-6 bg-white"
-              >
-                <div suppressHydrationWarning className="serif text-xl text-black font-light">
-                  {mounted ? item.value.toString().padStart(2, "0") : "--"}
-                </div>
-                <div className="mt-2 text-[8px] tracking-[0.2em] text-black/40 uppercase">{item.label}</div>
-              </motion.div>
-            ))}
-          </motion.div>
+          <Countdown />
         </section>
 
         <section className="mt-24">
@@ -195,14 +213,14 @@ export default function Home() {
             {/* Hilo conductor vertical animado */}
             <div className="absolute left-1/2 top-0 bottom-0 w-px bg-black/10 -translate-x-1/2" />
             
-            <div className="space-y-12">
+            <div className="space-y-16">
               {[
-                { time: "18:30h", text: "Ceremonia en Capilla de los Marineros.", icon: "⛪" },
-                { time: "19:30h", text: "Fin de la ceremonia.", icon: "✨" },
-                { time: "20:00h", text: "Salida de autobuses.", icon: "🚌" },
-                { time: "20:30h", text: "Copa de espera.", icon: "🥂" },
-                { time: "21:00h", text: "Cóctel.", icon: "🍸" },
-                { time: "23:00h", text: "Cena en Finca la Caprichosa.", icon: "🍽️" },
+                { time: "18:30h", text: "Ceremonia en Capilla de los Marineros.", icon: Church },
+                { time: "19:30h", text: "Fin de la ceremonia.", icon: CheckCircle2 },
+                { time: "20:00h", text: "Salida de autobuses.", icon: Bus },
+                { time: "20:30h", text: "Copa de espera.", icon: GlassWater },
+                { time: "21:00h", text: "Cóctel.", icon: UtensilsCrossed },
+                { time: "23:00h", text: "Cena en Finca la Caprichosa.", icon: Moon },
               ].map((ev, idx) => (
                 <motion.div
                   key={ev.time}
@@ -212,15 +230,18 @@ export default function Home() {
                   transition={{ ...springTransition, delay: idx * 0.05 }}
                   className="relative flex flex-col items-center text-center"
                 >
-                  {/* Nodo interactivo */}
+                  {/* Nodo interactivo con Icono */}
                   <motion.div
                     initial={{ scale: 0 }}
                     whileInView={{ scale: 1 }}
                     viewport={{ once: false, amount: 0.8 }}
-                    className="absolute left-1/2 -top-1.5 h-3 w-3 -translate-x-1/2 rounded-full border border-black bg-white z-10 transition-transform active:scale-150"
-                  />
+                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                    className="absolute left-1/2 -top-4 h-10 w-10 -translate-x-1/2 rounded-full border border-black/5 bg-white z-10 flex items-center justify-center shadow-sm"
+                  >
+                    <ev.icon className="h-4 w-4 text-black" strokeWidth={1.2} />
+                  </motion.div>
                   
-                  <div className="mt-6">
+                  <div className="mt-10">
                     <span className="serif text-black text-xs tracking-[0.2em] font-medium block mb-2">{ev.time}</span>
                     <p className="text-[11px] text-black/60 leading-relaxed font-light uppercase tracking-widest px-8">{ev.text}</p>
                   </div>
