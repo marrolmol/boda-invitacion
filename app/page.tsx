@@ -1,9 +1,8 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 "use client";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion, easeOut, AnimatePresence } from "framer-motion";
-import { Play, Pause, Mail, Heart } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Play, Pause, Heart } from "lucide-react";
 
 type TimeLeft = {
   days: number;
@@ -14,7 +13,7 @@ type TimeLeft = {
 
 // Transición tipo spring para que se sienta más orgánico y premium
 const springTransition = {
-  type: "spring",
+  type: "spring" as const,
   stiffness: 100,
   damping: 20,
   mass: 1,
@@ -88,12 +87,6 @@ function calcLeft(target: Date): TimeLeft {
   return { days, hours, minutes, seconds };
 }
 
-const fadeIn = {
-  initial: { opacity: 0, y: 10 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: easeOut },
-};
-
 export default function Home() {
   const targetDate = useMemo(() => new Date("2026-07-04T18:30:00"), []);
   const left = useCountdown(targetDate);
@@ -105,10 +98,19 @@ export default function Home() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      audioRef.current = new Audio("/music.mp3");
-      audioRef.current.loop = true;
+      const audio = new Audio("/music.mp3");
+      audio.loop = true;
+      audioRef.current = audio;
     }
-    setMounted(true);
+    const raf = requestAnimationFrame(() => setMounted(true));
+
+    return () => {
+      cancelAnimationFrame(raf);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
   }, []);
 
   useEffect(() => {
