@@ -36,41 +36,70 @@ const fadeInUp = {
   transition: { ...springTransition, damping: 25 },
 };
 
-function IntroInvitation({ onOpen }: { onOpen: () => void }) {
+function EnvelopeIntro({ onOpen }: { onOpen: () => void }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleOpen = () => {
+    setIsOpen(true);
+    setTimeout(onOpen, 1200); // Dar tiempo a la animación de la solapa
+  };
+
   return (
     <motion.div
       initial={{ opacity: 1 }}
-      exit={{ opacity: 0, transition: { duration: 1, ease: "easeInOut" } }}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-white px-6"
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-white"
     >
-      <div className="relative flex flex-col items-center text-center">
-        {/* Sello Minimalista B&W */}
+      <div className="relative w-full max-w-[320px] aspect-[4/3] perspective-1000">
+        {/* Cuerpo del sobre */}
+        <motion.div 
+          className="absolute inset-0 bg-[#1a1a1a] shadow-2xl z-10"
+          animate={isOpen ? { y: 100, opacity: 0 } : {}}
+          transition={{ duration: 0.8, ease: "easeIn" }}
+        />
+
+        {/* Solapa superior */}
         <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ ...springTransition, delay: 0.2 }}
-          className="mb-12 flex h-32 w-32 items-center justify-center rounded-full border border-black bg-white"
+          className="absolute inset-0 bg-[#262626] z-30 origin-top shadow-xl"
+          style={{ clipPath: "polygon(0 0, 100% 0, 50% 50%)" }}
+          animate={isOpen ? { rotateX: -180, zIndex: 0 } : {}}
+          transition={{ duration: 0.8, ease: "easeInOut" }}
+        />
+
+        {/* Sello / Monograma */}
+        {!isOpen && (
+          <motion.div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 cursor-pointer"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={handleOpen}
+          >
+            <div className="relative h-20 w-20 rounded-full bg-white p-1 shadow-2xl flex items-center justify-center border border-black/5">
+              <Image 
+                src="/image_3.png" 
+                alt="Sello A&S" 
+                fill 
+                className="object-contain p-2"
+              />
+            </div>
+          </motion.div>
+        )}
+
+        {/* Contenido que "sale" del sobre (image_1.png) */}
+        <motion.div
+          className="absolute inset-x-4 bottom-4 top-4 bg-white z-20 shadow-lg p-2"
+          animate={isOpen ? { y: -150, scale: 1.1 } : { y: 0, scale: 1 }}
+          transition={{ duration: 1, ease: "easeOut", delay: 0.3 }}
         >
-          <Heart className="h-10 w-10 text-black" strokeWidth={1} />
+          <div className="relative w-full h-full border border-black/5">
+            <Image 
+              src="/image_1.png" 
+              alt="Invitación" 
+              fill 
+              className="object-cover"
+            />
+          </div>
         </motion.div>
-
-        <motion.h2
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="serif mb-10 text-3xl tracking-[0.2em] font-light uppercase"
-        >
-          Adrián & Sara
-        </motion.h2>
-
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={onOpen}
-          className="serif group relative flex h-14 items-center justify-center border border-black bg-black px-12 text-white transition-all"
-        >
-          <span className="relative z-10 text-sm tracking-[0.3em] uppercase font-light">Abrir</span>
-        </motion.button>
       </div>
     </motion.div>
   );
@@ -197,7 +226,7 @@ export default function Home() {
   return (
     <div className="w-full min-h-screen bg-white">
       <AnimatePresence>
-        {!isOpen && <IntroInvitation onOpen={handleOpen} />}
+        {!isOpen && <EnvelopeIntro onOpen={handleOpen} />}
       </AnimatePresence>
 
       <main className={`mx-auto w-full max-w-sm px-4 pb-28 transition-opacity duration-1000 ${isOpen ? "opacity-100" : "opacity-0 h-screen overflow-hidden"}`}>
@@ -205,9 +234,9 @@ export default function Home() {
           <motion.div {...fadeInUp}>
             <p className="text-[10px] tracking-[0.4em] text-black/40 uppercase font-medium">Invitación</p>
             <h1 className="serif mt-6 text-4xl font-light leading-tight text-black tracking-[0.1em] uppercase">
-              Adrián
-              <span className="block my-2 text-2xl text-black/20 italic font-serif leading-none tracking-normal">&</span>
               Sara
+              <span className="block my-2 text-2xl text-black/20 italic font-serif leading-none tracking-normal">&</span>
+              Adrián
             </h1>
             <p className="mt-8 text-[11px] text-black/60 tracking-[0.3em] font-light uppercase">Sevilla · 04 / 07 / 2026</p>
           </motion.div>
@@ -286,7 +315,7 @@ export default function Home() {
                 <h3 className="serif text-lg font-light text-black tracking-widest uppercase">Capilla de los Marineros</h3>
                 <p className="mt-2 text-[10px] text-black/40 tracking-[0.2em] uppercase">TRIANA, SEVILLA</p>
                 <a
-                  href="https://www.google.com/maps?q=37.384,-6.00102"
+                  href="https://maps.app.goo.gl/TcRACKVzVKZNLEHt9"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-6 inline-flex h-12 w-3/4 items-center justify-center border border-black text-black text-[10px] tracking-[0.3em] uppercase hover:bg-black hover:text-white transition-colors"
@@ -410,10 +439,6 @@ export default function Home() {
         </section>
 
         <section className="mt-24 mb-32">
-          <motion.div {...fadeInUp} className="text-center mb-12">
-            <h2 className="serif text-2xl font-light text-black tracking-[0.2em] uppercase">Presente</h2>
-          </motion.div>
-          
           <motion.div
             className="text-center px-8"
             {...fadeInUp}
@@ -424,13 +449,13 @@ export default function Home() {
             <div className="space-y-6">
               <p className="text-[8px] font-bold tracking-[0.4em] text-black/30 uppercase">Número de cuenta (IBAN)</p>
               <div className="flex flex-col items-center gap-6">
-                <span className="serif text-xs font-light tracking-[0.2em] text-black">ES00 0000 0000 0000 0000 0000</span>
-                <span className="text-[9px] text-black/40 tracking-[0.1em] uppercase font-light">Adrián Santiago Jaime & Sara Reyes Aranda</span>
+                <span className="serif text-xs font-light tracking-[0.2em] text-black">ES54 2100 7273 0002 0030 4414</span>
+                <span className="text-[9px] text-black/40 tracking-[0.1em] uppercase font-light">Sara Reyes & Adrián Santiago</span>
                 <button
                   type="button"
                   className="border-b border-black/20 pb-1 text-[9px] tracking-[0.3em] uppercase text-black hover:text-black/40 transition-colors"
                   onClick={() => {
-                    navigator.clipboard.writeText("ES00 0000 0000 0000 0000 0000");
+                    navigator.clipboard.writeText("ES54 2100 7273 0002 0030 4414");
                     alert("Copiado al portapapeles");
                   }}
                 >

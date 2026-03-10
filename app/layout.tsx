@@ -17,9 +17,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Adrián & Sara | 04/07/2026",
+  title: "Sara & Adrián | 04/07/2026",
   description:
-    "Invitación de boda digital de Adrián & Sara. Sevilla, 04/07/2026.",
+    "Invitación de boda digital de Sara Reyes & Adrián Santiago. Sevilla, 04/07/2026.",
 };
 
 export const viewport: Viewport = {
@@ -35,7 +35,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <body className={`${cinzel.variable} ${inter.variable} antialiased bg-white text-black`}>
         {children}
       </body>
