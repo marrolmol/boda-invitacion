@@ -37,69 +37,108 @@ const fadeInUp = {
 };
 
 function EnvelopeIntro({ onOpen }: { onOpen: () => void }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpening, setIsOpening] = useState(false);
+  const [isRevealed, setIsRevealed] = useState(false);
 
   const handleOpen = () => {
-    setIsOpen(true);
-    setTimeout(onOpen, 1200); // Dar tiempo a la animación de la solapa
+    setIsOpening(true);
+    // 1.2s para abrir la solapa, luego emerge la tarjeta
+    setTimeout(() => {
+      // La tarjeta termina de emerger después de ~1.5s (total 2.7s)
+      setTimeout(() => {
+        setIsRevealed(true);
+        setTimeout(onOpen, 1000); // 1s de fade out final
+      }, 3000); // Tiempo que la tarjeta se queda visible
+    }, 1200);
   };
 
   return (
     <motion.div
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-white"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-white overflow-hidden"
     >
-      <div className="relative w-full max-w-[320px] aspect-[4/3] perspective-1000">
-        {/* Cuerpo del sobre */}
-        <motion.div 
-          className="absolute inset-0 bg-[#1a1a1a] shadow-2xl z-10"
-          animate={isOpen ? { y: 100, opacity: 0 } : {}}
-          transition={{ duration: 0.8, ease: "easeIn" }}
+      <div className="relative w-full max-w-[340px] aspect-[4/3] perspective-2000">
+        {/* Cuerpo del sobre (Trasero) */}
+        <div className="absolute inset-0 bg-[#0a0a0a] shadow-2xl z-0" 
+             style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)" }} />
+
+        {/* Tarjeta de Papel Física (Revelación) */}
+        <motion.div
+          className="absolute inset-x-6 top-4 bottom-4 z-10 bg-[#fdfbf7] shadow-lg flex flex-col items-center justify-center text-center p-8 border-[0.5px] border-black/5"
+          initial={{ y: 0, scale: 0.95 }}
+          animate={isOpening ? { y: -180, scale: 1.05 } : {}}
+          transition={{ duration: 1.5, ease: "easeOut", delay: 0.8 }}
+          style={{
+            backgroundImage: "radial-gradient(#00000005 1px, transparent 0)",
+            backgroundSize: "4px 4px",
+          }}
+        >
+          {/* Borde Gofrado Sutil */}
+          <div className="absolute inset-2 border border-black/10 pointer-events-none" />
+          <div className="absolute inset-3 border-[0.5px] border-black/5 pointer-events-none" />
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={isOpening ? { opacity: 1 } : {}}
+            transition={{ delay: 1.8, duration: 1 }}
+          >
+            <h2 className="serif text-[14px] font-light tracking-[0.3em] uppercase text-black mb-6">
+              Sara Reyes Aranda
+              <span className="block my-2 text-black/30 italic font-serif lowercase tracking-normal">&</span>
+              Adrián Santiago Jaime
+            </h2>
+            
+            <div className="w-8 h-px bg-black/20 mx-auto mb-6" />
+            
+            <p className="serif text-[10px] tracking-[0.4em] uppercase text-black/60 mb-8 font-light italic">
+              Os invitan a su boda
+            </p>
+
+            <p className="serif text-[11px] tracking-[0.2em] uppercase text-black font-medium">
+              Sevilla
+              <span className="mx-3 text-black/20">|</span>
+              04 / 07 / 2026
+            </p>
+          </motion.div>
+        </motion.div>
+
+        {/* Cuerpo del sobre (Delantero/Laterales) */}
+        <div 
+          className="absolute inset-0 bg-[#141414] z-20"
+          style={{ clipPath: "polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%)" }}
         />
 
         {/* Solapa superior */}
         <motion.div
-          className="absolute inset-0 bg-[#262626] z-30 origin-top shadow-xl"
+          className="absolute inset-0 bg-[#1a1a1a] z-30 origin-top shadow-xl"
           style={{ clipPath: "polygon(0 0, 100% 0, 50% 50%)" }}
-          animate={isOpen ? { rotateX: -180, zIndex: 0 } : {}}
-          transition={{ duration: 0.8, ease: "easeInOut" }}
+          animate={isOpening ? { rotateX: -160, zIndex: 5 } : {}}
+          transition={{ duration: 1, ease: "easeInOut" }}
         />
 
         {/* Sello / Monograma */}
-        {!isOpen && (
-          <motion.div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 cursor-pointer"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={handleOpen}
-          >
-            <div className="relative h-20 w-20 rounded-full bg-white p-1 shadow-2xl flex items-center justify-center border border-black/5">
-              <Image 
-                src="/image_3.png" 
-                alt="Sello A&S" 
-                fill 
-                className="object-contain p-2"
-              />
-            </div>
-          </motion.div>
-        )}
-
-        {/* Contenido que "sale" del sobre (image_1.png) */}
-        <motion.div
-          className="absolute inset-x-4 bottom-4 top-4 bg-white z-20 shadow-lg p-2"
-          animate={isOpen ? { y: -150, scale: 1.1 } : { y: 0, scale: 1 }}
-          transition={{ duration: 1, ease: "easeOut", delay: 0.3 }}
-        >
-          <div className="relative w-full h-full border border-black/5">
-            <Image 
-              src="/image_1.png" 
-              alt="Invitación" 
-              fill 
-              className="object-cover"
-            />
-          </div>
-        </motion.div>
+        <AnimatePresence>
+          {!isOpening && (
+            <motion.div
+              key="seal"
+              exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.4 } }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 cursor-pointer"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={handleOpen}
+            >
+              <div className="relative h-20 w-20 rounded-full bg-white p-1 shadow-2xl flex items-center justify-center border border-black/5 overflow-hidden">
+                <Image 
+                  src="/image_3.png" 
+                  alt="Sello A&S" 
+                  fill 
+                  className="object-contain p-2"
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   );
@@ -158,7 +197,7 @@ function Countdown() {
           initial={{ opacity: 0, y: 10 }}
           animate={forceShow ? { opacity: 1, y: 0 } : {}}
           whileInView={{ opacity: 1, y: 0 }}
-          className="flex flex-col items-center justify-center bg-transparent"
+          className="flex flex-col items-center justify-center bg-transparent border-x border-black/5"
         >
           <span className="serif text-4xl font-light text-black tracking-tighter">
             {item.value.toString().padStart(2, "0")}
@@ -169,6 +208,159 @@ function Countdown() {
         </motion.div>
       ))}
     </motion.div>
+  );
+}
+
+function RSVPForm() {
+  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [formData, setFormData] = useState({
+    nombre: "",
+    asistencia: "si",
+    bus: "no",
+    alergias: "",
+    mensaje: ""
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus("submitting");
+
+    try {
+      const response = await fetch("https://script.google.com/macros/s/AKfycbzP-5iFFVvdmgzj-HVYQYOWrwcIV7-5DOUMRGkrKoJgup_Ag-SpPHyl1dzkTvK59-LH/exec", {
+        method: "POST",
+        mode: "no-cors", // Necesario para Google Apps Script
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      
+      setStatus("success");
+    } catch (error) {
+      console.error("Error:", error);
+      setStatus("error");
+    }
+  };
+
+  if (status === "success") {
+    return (
+      <motion.div 
+        initial={{ opacity: 0 }} 
+        animate={{ opacity: 1 }} 
+        className="text-center py-12 px-6"
+      >
+        <p className="serif text-lg text-black leading-relaxed tracking-wide">
+          ¡Gracias! Tu respuesta ha sido recibida.<br/>
+          <span className="text-black/40 text-sm mt-4 block">Tenemos muchas ganas de compartir este día con vosotros.</span>
+        </p>
+      </motion.div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-10 mt-12 mb-16 px-2">
+      <div className="space-y-2 group">
+        <label className="serif text-[10px] tracking-[0.3em] uppercase text-black/40 block transition-colors group-focus-within:text-black">Nombre y Apellidos</label>
+        <input
+          required
+          type="text"
+          value={formData.nombre}
+          onChange={(e) => setFormData({...formData, nombre: e.target.value})}
+          className="w-full bg-transparent border-b border-black/10 py-3 text-sm tracking-widest focus:outline-none focus:border-black transition-colors placeholder:text-black/10"
+          placeholder="Escribe tu nombre completo"
+        />
+      </div>
+
+      <div className="space-y-4">
+        <label className="serif text-[10px] tracking-[0.3em] uppercase text-black/40 block">¿Podrás asistir?</label>
+        <div className="flex gap-10">
+          <label className="flex items-center gap-3 cursor-pointer group">
+            <input 
+              type="radio" 
+              name="asistencia" 
+              value="si" 
+              checked={formData.asistencia === "si"}
+              onChange={() => setFormData({...formData, asistencia: "si"})}
+              className="appearance-none w-3 h-3 border border-black/20 rounded-full checked:bg-black checked:border-black transition-all"
+            />
+            <span className="text-[11px] tracking-widest uppercase text-black/60 group-hover:text-black">Sí, allí estaré</span>
+          </label>
+          <label className="flex items-center gap-3 cursor-pointer group">
+            <input 
+              type="radio" 
+              name="asistencia" 
+              value="no"
+              checked={formData.asistencia === "no"}
+              onChange={() => setFormData({...formData, asistencia: "no"})}
+              className="appearance-none w-3 h-3 border border-black/20 rounded-full checked:bg-black checked:border-black transition-all"
+            />
+            <span className="text-[11px] tracking-widest uppercase text-black/60 group-hover:text-black">No podré ir</span>
+          </label>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <label className="serif text-[10px] tracking-[0.3em] uppercase text-black/40 block">¿Necesitas plaza en el autobús?</label>
+        <div className="flex gap-10">
+          <label className="flex items-center gap-3 cursor-pointer group">
+            <input 
+              type="radio" 
+              name="bus" 
+              value="si"
+              checked={formData.bus === "si"}
+              onChange={() => setFormData({...formData, bus: "si"})}
+              className="appearance-none w-3 h-3 border border-black/20 rounded-full checked:bg-black checked:border-black transition-all"
+            />
+            <span className="text-[11px] tracking-widest uppercase text-black/60 group-hover:text-black">Sí</span>
+          </label>
+          <label className="flex items-center gap-3 cursor-pointer group">
+            <input 
+              type="radio" 
+              name="bus" 
+              value="no"
+              checked={formData.bus === "no"}
+              onChange={() => setFormData({...formData, bus: "no"})}
+              className="appearance-none w-3 h-3 border border-black/20 rounded-full checked:bg-black checked:border-black transition-all"
+            />
+            <span className="text-[11px] tracking-widest uppercase text-black/60 group-hover:text-black">No</span>
+          </label>
+        </div>
+      </div>
+
+      <div className="space-y-2 group">
+        <label className="serif text-[10px] tracking-[0.3em] uppercase text-black/40 block transition-colors group-focus-within:text-black">Alergias o Intolerancias</label>
+        <input
+          type="text"
+          value={formData.alergias}
+          onChange={(e) => setFormData({...formData, alergias: e.target.value})}
+          className="w-full bg-transparent border-b border-black/10 py-3 text-sm tracking-widest focus:outline-none focus:border-black transition-colors placeholder:text-black/10"
+          placeholder="Ej: Gluten, Frutos secos..."
+        />
+      </div>
+
+      <div className="space-y-2 group">
+        <label className="serif text-[10px] tracking-[0.3em] uppercase text-black/40 block transition-colors group-focus-within:text-black">Mensaje para los novios</label>
+        <textarea
+          rows={2}
+          value={formData.mensaje}
+          onChange={(e) => setFormData({...formData, mensaje: e.target.value})}
+          className="w-full bg-transparent border-b border-black/10 py-3 text-sm tracking-widest focus:outline-none focus:border-black transition-colors placeholder:text-black/10 resize-none"
+          placeholder="Escribe algo bonito o una canción..."
+        />
+      </div>
+
+      <button
+        type="submit"
+        disabled={status === "submitting"}
+        className="w-full bg-black text-white py-5 text-[11px] tracking-[0.5em] uppercase serif hover:bg-black/90 disabled:bg-black/40 transition-all duration-300"
+      >
+        {status === "submitting" ? "Enviando..." : "ENVIAR"}
+      </button>
+
+      {status === "error" && (
+        <p className="text-[10px] text-red-500 text-center tracking-widest uppercase">Hubo un error al enviar. Por favor, inténtalo de nuevo.</p>
+      )}
+    </form>
   );
 }
 
@@ -240,6 +432,26 @@ export default function Home() {
             </h1>
             <p className="mt-8 text-[11px] text-black/60 tracking-[0.3em] font-light uppercase">Sevilla · 04 / 07 / 2026</p>
           </motion.div>
+
+          {/* Nueva Sección: Nuestra Historia con Foto de la Pareja */}
+          <motion.section 
+            className="mt-10 mb-10 px-4"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ ...springTransition, delay: 0.2 }}
+          >
+            <p className="serif text-[9px] tracking-[0.5em] text-black/40 uppercase mb-6">Nuestra historia</p>
+            <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl shadow-md grayscale transition-all duration-700 hover:grayscale-0">
+              <Image
+                src="/foto-pareja-costa.jpg"
+                alt="Sara & Adrián"
+                fill
+                className="object-cover"
+                sizes="(max-width: 640px) 100vw, 640px"
+              />
+            </div>
+          </motion.section>
 
           <Countdown />
         </section>
@@ -360,82 +572,9 @@ export default function Home() {
             <p className="mt-4 text-[10px] text-black/40 tracking-[0.2em] uppercase font-light">Se ruega confirmación antes del 1 de Junio</p>
           </motion.div>
           
-          <motion.form
-            {...fadeInUp}
-            onSubmit={(e) => {
-              e.preventDefault();
-              const form = e.currentTarget as HTMLFormElement;
-              const data = new FormData(form);
-              const payload = {
-                nombre: data.get("nombre"),
-                asistiras: data.get("asistiras") === "si",
-                autobus: data.get("autobus") === "si",
-                alergias: data.get("alergias"),
-              };
-              try {
-                localStorage.setItem("rsvp", JSON.stringify(payload));
-                alert("¡Gracias! Hemos registrado tu respuesta.");
-                form.reset();
-              } catch {}
-            }}
-            className="mt-8 space-y-8"
-          >
-            <div className="border-b border-black/10 pb-2">
-              <label className="text-[9px] font-bold uppercase tracking-[0.3em] text-black/40 block mb-3">Nombre Completo</label>
-              <input
-                name="nombre"
-                required
-                placeholder="Introduzca su nombre"
-                className="w-full bg-transparent py-2 text-xs tracking-widest focus:outline-none placeholder:text-black/20"
-              />
-            </div>
-
-            <div className="space-y-4">
-              <label className="text-[9px] font-bold uppercase tracking-[0.3em] text-black/40 block">Asistencia</label>
-              <div className="space-y-3">
-                <label className="flex items-center gap-4 text-[10px] tracking-[0.2em] uppercase cursor-pointer group">
-                  <input type="radio" name="asistiras" value="si" required className="accent-black h-3 w-3" />
-                  Confirmar asistencia
-                </label>
-                <label className="flex items-center gap-4 text-[10px] tracking-[0.2em] uppercase cursor-pointer group">
-                  <input type="radio" name="asistiras" value="no" className="accent-black h-3 w-3" />
-                  Lamentablemente no podré asistir
-                </label>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <label className="text-[9px] font-bold uppercase tracking-[0.3em] text-black/40 block">Transporte</label>
-              <div className="flex gap-12">
-                <label className="flex items-center gap-4 text-[10px] tracking-[0.2em] uppercase cursor-pointer">
-                  <input type="radio" name="autobus" value="si" required className="accent-black h-3 w-3" />
-                  Sí
-                </label>
-                <label className="flex items-center gap-4 text-[10px] tracking-[0.2em] uppercase cursor-pointer">
-                  <input type="radio" name="autobus" value="no" className="accent-black h-3 w-3" />
-                  No
-                </label>
-              </div>
-            </div>
-
-            <div className="border-b border-black/10 pb-2">
-              <label className="text-[9px] font-bold uppercase tracking-[0.3em] text-black/40 block mb-3">Observaciones</label>
-              <textarea
-                name="alergias"
-                placeholder="Indique alergias o intolerancias"
-                className="w-full bg-transparent py-2 text-xs tracking-widest focus:outline-none placeholder:text-black/20 min-h-[60px]"
-              />
-            </div>
-
-            <motion.button
-              whileHover={{ backgroundColor: "#000", color: "#fff" }}
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              className="mt-8 h-14 w-full border border-black bg-white text-black text-[10px] tracking-[0.4em] uppercase font-medium transition-colors"
-            >
-              Enviar
-            </motion.button>
-          </motion.form>
+          <motion.div {...fadeInUp}>
+            <RSVPForm />
+          </motion.div>
         </section>
 
         <section className="mt-24 mb-32">
@@ -465,6 +604,23 @@ export default function Home() {
             </div>
           </motion.div>
         </section>
+
+        <footer className="mt-32 text-center pb-12">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 1.5 }}
+            className="space-y-4"
+          >
+            <div className="w-12 h-px bg-black/10 mx-auto mb-8" />
+            <p className="serif text-[12px] tracking-[0.4em] uppercase text-black/60">
+              Sara & Adrián
+            </p>
+            <p className="text-[8px] tracking-[0.2em] uppercase text-black/20 font-light">
+              04 . 07 . 2026
+            </p>
+          </motion.div>
+        </footer>
       </main>
 
       {isOpen && (
